@@ -4,27 +4,37 @@ volumes:
   mysql-data:
 
 services:
+  # 🟦 PHP + Apache backend
   web-backend:
     build: ./config/backend
     container_name: web-backend
     ports:
-      - 8080:80
+      - "8080:80"
     volumes:
-      - ../11-training-php:/var/www/html
+      - ../11-training-php:/var/www/html          # mã nguồn PHP
       - ./config/backend/php.ini:/usr/local/etc/php/php.ini
       - ./config/httpd_security.conf:/etc/apache2/conf-available/security.conf
     working_dir: /var/www/html
     environment:
       APP_ENV: local
+      DB_HOST: web-mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: web-redis
+      REDIS_PORT: 6379
     depends_on:
       - web-mysql
+      - web-redis
     restart: always
 
+  # 🟨 MySQL Database
   web-mysql:
     container_name: web-mysql
-    image: "mysql:5.7.43"
+    image: mysql:5.7.43
     ports:
-      - 3306:3306
+      - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     environment:
@@ -33,14 +43,27 @@ services:
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    restart: always
 
+  # 🟩 phpMyAdmin
   web-phpmyadmin:
     container_name: phpmyadmin
     image: phpmyadmin/phpmyadmin
     links:
       - web-mysql:mysql
     ports:
-      - "8081:80"
+      - "8082:80"
     environment:
       PMA_HOST: web-mysql
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      - web-mysql
+    restart: always
+
+  # 🟥 Redis
+  web-redis:
+    container_name: web-redis
+    image: redis:7
+    ports:
+      - "6379:6379"
+    restart: always

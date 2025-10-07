@@ -4,7 +4,7 @@ require 'vendor/autoload.php'; // Predis
 // Kết nối Redis cho queue
 $redis = new Predis\Client([
     'scheme' => 'tcp',
-    'host'   => 'redis-server', // đúng bằng container name
+    'host'   => 'web-redis',
     'port'   => 6379,
 ]);
 
@@ -106,25 +106,25 @@ if (!empty($_POST['submit'])) {
     </div>
 
     <script>
-        // Lưu username vào localStorage trước khi submit
-        document.getElementById("login-form").addEventListener("submit", function(e) {
-            let username = document.getElementById("login-username").value;
-            if (document.getElementById("remember").checked) {
-                localStorage.setItem("username", username);
-            } else {
-                localStorage.removeItem("username");
-            }
-        });
-
-        // Tự động điền lại nếu có lưu
-        window.onload = function() {
-            let savedUser = localStorage.getItem("username");
-            if (savedUser) {
-                document.getElementById("login-username").value = savedUser;
-                document.getElementById("remember").checked = true;
-            }
-            console.log("LocalStorage:", localStorage); // để test trong F12 console
+    // Lưu username vào localStorage trước khi submit
+    document.getElementById("login-form").addEventListener("submit", function(e) {
+        let username = document.getElementById("login-username").value;
+        if (document.getElementById("remember").checked) {
+            localStorage.setItem("username", username);
+        } else {
+            localStorage.removeItem("username");
         }
+    });
+
+    // Tự động điền lại nếu có lưu
+    window.onload = function() {
+        let savedUser = localStorage.getItem("username");
+        if (savedUser) {
+            document.getElementById("login-username").value = savedUser;
+            document.getElementById("remember").checked = true;
+        }
+        console.log("LocalStorage:", localStorage); // để test trong F12 console
+    }
     </script>
 
 </body>
